@@ -15,6 +15,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 # MA 02110-1301 USA
 
+from decimal import Decimal
 from unittest import TestCase
 
 from num2words import num2words
@@ -150,6 +151,53 @@ class Num2WordsENTest(TestCase):
                       cents=True, currency='KRW'),
             "two thousand won and zero jeon"
         )
+
+    def test_additional_currency_forms(self):
+        cases = (
+            ('SGD', '1.01', 'one dollar and one cent'),
+            ('SGD', '12.56', 'twelve dollars and fifty-six cents'),
+            ('CHF', '1.01', 'one franc and one centime'),
+            ('CHF', '12.56', 'twelve francs and fifty-six centimes'),
+            ('AED', '1.01', 'one dirham and one fils'),
+            ('AED', '12.56', 'twelve dirhams and fifty-six fils'),
+        )
+        for currency, amount, expected in cases:
+            with self.subTest(currency=currency, amount=amount):
+                self.assertEqual(
+                    num2words(Decimal(amount), lang='en', to='currency',
+                              currency=currency, separator=' and'),
+                    expected,
+                )
+
+    def test_additional_currency_options(self):
+        cases = (
+            ('SGD', 'dollars', 'cents', 'Singapore'),
+            ('CHF', 'francs', 'centimes', 'Swiss'),
+            ('AED', 'dirhams', 'fils', 'UAE'),
+        )
+        for currency, major, minor, adjective in cases:
+            with self.subTest(currency=currency):
+                self.assertEqual(
+                    num2words(Decimal('-12.56'), lang='en', to='currency',
+                              currency=currency, separator=' and',
+                              adjective=True, cents=False),
+                    'minus twelve %s %s and 56 %s' %
+                    (adjective, major, minor),
+                )
+                self.assertEqual(
+                    num2words('0', lang='en', to='currency',
+                              currency=currency),
+                    'zero %s' % major,
+                )
+
+    def test_additional_currencies_regional_english(self):
+        for language in ('en_US', 'en_IN'):
+            with self.subTest(language=language):
+                self.assertEqual(
+                    num2words(Decimal('12.56'), lang=language,
+                              to='currency', currency='SGD'),
+                    'twelve dollars, fifty-six cents',
+                )
 
     def test_to_year(self):
         # issue 141

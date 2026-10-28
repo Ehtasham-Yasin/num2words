@@ -21,6 +21,18 @@ from . import lang_EU
 
 
 class Num2Word_EN(lang_EU.Num2Word_EU):
+    CURRENCY_FORMS = dict(lang_EU.Num2Word_EU.CURRENCY_FORMS, **{
+        'SGD': (lang_EU.GENERIC_DOLLARS, lang_EU.GENERIC_CENTS),
+        'CHF': (('franc', 'francs'), ('centime', 'centimes')),
+        'AED': (('dirham', 'dirhams'), ('fils', 'fils')),
+    })
+
+    CURRENCY_ADJECTIVES = dict(lang_EU.Num2Word_EU.CURRENCY_ADJECTIVES, **{
+        'SGD': 'Singapore',
+        'CHF': 'Swiss',
+        'AED': 'UAE',
+    })
+
     def set_high_numwords(self, high):
         max = 3 + 3 * len(high)
         for word, n in zip(high, range(max, 3, -3)):
